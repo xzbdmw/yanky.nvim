@@ -238,7 +238,7 @@ function yanky.cycle(direction)
         yanky.attach_cancel()
         return
       end
-      yanky.ring.callback(new_state, do_put)
+      do_put(new_state)
     end
   end)
 
