@@ -222,25 +222,33 @@ function yanky.cycle(direction)
   yanky.ring.state.register = yanky.ring.state.register ~= "=" and yanky.ring.state.register
     or utils.get_default_register()
 
-  utils.use_temporary_register(yanky.ring.state.register, next_content, function()
-    if new_state.use_repeat then
-      local ok, val = pcall(vim.cmd, "silent normal! u.")
-      if not ok then
-        vim.notify(val, vim.log.levels.WARN)
-        yanky.attach_cancel()
-        return
+  utils.use_temporary_register(
+    yanky.ring.state.register,
+    next_content,
+    function()
+      if new_state.use_repeat then
+        local ok, val = pcall(vim.cmd, "silent normal! u.")
+        if not ok then
+          vim.notify(val, vim.log.levels.WARN)
+          yanky.attach_cancel()
+          return
+        end
+        highlight.highlight_put(new_state)
+      else
+        local ok, val = pcall(vim.cmd, "silent normal! u")
+        if not ok then
+          vim.notify(val, ok.log.levels.WARN)
+          yanky.attach_cancel()
+          return
+        end
+        do_put(new_state)
       end
-      highlight.highlight_put(new_state)
-    else
-      local ok, val = pcall(vim.cmd, "silent normal! u")
-      if not ok then
-        vim.notify(val, vim.log.levels.WARN)
-        yanky.attach_cancel()
-        return
-      end
-      do_put(new_state)
+    end,
+    new_state.is_visual,
+    function()
+      return yanky.cycle(direction)
     end
-  end)
+  )
 
   if yanky.config.options.ring.update_register_on_cycle then
     vim.fn.setreg(new_state.register, next_content.regcontents, next_content.regtype)

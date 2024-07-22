@@ -36,9 +36,21 @@ function utils.get_register_info(register)
   }
 end
 
-function utils.use_temporary_register(register, register_info, callback)
+function utils.use_temporary_register(register, register_info, callback, is_visual, fail_callback)
   local current_register_info = utils.get_register_info(register)
+
+  local last = vim.fn.getreg("z")
+  if last == register_info.regcontents then
+    fail_callback()
+    return
+  end
+
+  if is_visual then
+    register_info.regtype = "v"
+  end
+
   vim.fn.setreg(register, register_info.regcontents, register_info.regtype)
+  vim.fn.setreg("z", register_info.regcontents, register_info.regtype)
   callback()
   vim.fn.setreg(register, current_register_info.regcontents, current_register_info.regtype)
 end
