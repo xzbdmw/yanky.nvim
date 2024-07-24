@@ -126,7 +126,13 @@ function yanky.attach_cancel()
       vim.api.nvim_create_autocmd("CursorMoved", {
         group = yanky.ring.state.augroup,
         buffer = 0,
-        callback = yanky.clear_ring,
+        callback = function()
+          yanky.clear_ring()
+          vim.keymap.set("n", "<leader>na", function()
+            vim.cmd("NoiceAll")
+            vim.cmd("wincmd L")
+          end)
+        end,
       })
     end)
   else
