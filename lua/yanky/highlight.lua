@@ -57,6 +57,8 @@ function highlight.highlight_put(state)
     0,
     vim.schedule_wrap(function()
       vim.api.nvim_buf_clear_namespace(0, highlight.hl_put, 0, -1)
+      vim.g.hlchunk_disable = false
+      _G.indent_update()
     end)
   )
 end
