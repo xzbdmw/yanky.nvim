@@ -13,6 +13,9 @@ function history.setup()
 end
 
 function history.push(item)
+  if #item.regcontents > 20000 then
+    return
+  end
   local prev = history.storage.get(1)
   if prev ~= nil and prev.regcontents == item.regcontents and prev.regtype == item.regtype then
     return

@@ -13,7 +13,7 @@ function highlight.setup()
     vim.api.nvim_create_autocmd("TextYankPost", {
       pattern = "*",
       callback = function(_)
-        pcall(vim.highlight.on_yank, { higroup = "YankyYanked", timeout = highlight.config.timer })
+        pcall(vim.highlight.on_yank, { higroup = "YankyYanked", timeout = highlight.config.timer, priority = 2000 })
       end,
     })
 
@@ -57,6 +57,7 @@ function highlight.highlight_put(state)
     0,
     vim.schedule_wrap(function()
       vim.api.nvim_buf_clear_namespace(0, highlight.hl_put, 0, -1)
+      pcall(vim.api.nvim_buf_clear_namespace, 0, vim.api.nvim_create_namespace("on_yank_visual"), 0, -1)
       vim.g.hlchunk_disable = false
       _G.indent_update()
     end)
