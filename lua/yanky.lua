@@ -128,6 +128,7 @@ function yanky.attach_cancel()
         buffer = 0,
         callback = function()
           yanky.clear_ring()
+          vim.fn.setreg("z", "", "V")
           vim.keymap.set("n", "<leader>na", function()
             vim.cmd("NoiceAll")
             vim.cmd("wincmd L")
