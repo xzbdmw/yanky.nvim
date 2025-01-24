@@ -70,16 +70,28 @@ local function do_put(state, _)
     vim.cmd([[execute "normal! \<esc>"]])
   end
 
+  local s
+  local register = state.register ~= "=" and state.register
+    or "=" .. vim.api.nvim_replace_termcodes("<CR>", true, false, true)
+  if vim.fn.getregtype(register) == "V" then
+    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    FeedKeys("oa", "mix")
+    s = vim.split(vim.fn.getreg(register), "\n", { trimempty = true })
+    local new_content = utils.update_indent(s, vim.api.nvim_get_current_line():match("^(%s*)"))
+    vim.api.nvim_win_set_cursor(0, { row, col })
+    vim.api.nvim_buf_set_lines(0, row, row + 1, false, {})
+    vim.fn.setreg(register, new_content)
+  end
+
   local ok, val = pcall(
     vim.cmd,
-    string.format(
-      'silent normal! %s"%s%s%s',
-      state.is_visual and "gv" or "",
-      state.register ~= "=" and state.register or "=" .. vim.api.nvim_replace_termcodes("<CR>", true, false, true),
-      state.count,
-      state.type
-    )
+    string.format('silent normal! %s"%s%s%s', state.is_visual and "gv" or "", register, state.count, state.type)
   )
+
+  if vim.fn.getregtype(register) == "V" then
+    vim.fn.setreg(register, s)
+  end
+
   if not ok then
     vim.notify(val, vim.log.levels.WARN)
     return

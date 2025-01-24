@@ -38,7 +38,36 @@ function utils.get_register_info(register)
   }
 end
 
+utils.compute_indent = function(lines)
+  local res_indent, res_indent_width = nil, math.huge
+  local blank_indent, blank_indent_width = nil, math.huge
+  for _, l in ipairs(lines) do
+    local cur_indent = l:match("^%s*")
+    local cur_indent_width = cur_indent:len()
+    local is_blank = cur_indent_width == l:len()
+    if not is_blank and cur_indent_width < res_indent_width then
+      res_indent, res_indent_width = cur_indent, cur_indent_width
+    elseif is_blank and cur_indent_width < blank_indent_width then
+      blank_indent, blank_indent_width = cur_indent, cur_indent_width
+    end
+  end
+  return res_indent or blank_indent or ""
+end
+
+utils.update_indent = function(lines, new_indent)
+  -- Replace current indent with new indent without affecting blank lines
+  local n_cur_indent = utils.compute_indent(lines):len()
+  return vim.tbl_map(function(l)
+    if l:find("^%s*$") ~= nil then
+      return l
+    end
+    return new_indent .. l:sub(n_cur_indent + 1)
+  end, lines)
+end
+
 function utils.use_temporary_register(register, register_info, callback)
+  local s = vim.split(register_info.regcontents, "\n", { trimempty = true })
+  register_info.regcontents = utils.update_indent(s, vim.api.nvim_get_current_line():match("^(%s*)"))
   local current_register_info = utils.get_register_info(register)
   vim.fn.setreg(register, register_info.regcontents, register_info.regtype)
   callback()
