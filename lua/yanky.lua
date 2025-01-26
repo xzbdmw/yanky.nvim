@@ -75,11 +75,19 @@ local function do_put(state, _)
     or "=" .. vim.api.nvim_replace_termcodes("<CR>", true, false, true)
   if vim.fn.getregtype(register) == "V" then
     local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-    FeedKeys("oa", "mix")
+    if state.type == "p" then
+      FeedKeys("oa", "mix")
+    else
+      FeedKeys("Oa", "mix")
+    end
     s = vim.split(vim.fn.getreg(register):gsub("\n$", ""), "\n")
     local new_content = utils.update_indent(s, vim.api.nvim_get_current_line():match("^(%s*)"))
     vim.api.nvim_win_set_cursor(0, { row, col })
-    vim.api.nvim_buf_set_lines(0, row, row + 1, false, {})
+    if state.type == "p" then
+      vim.api.nvim_buf_set_lines(0, row, row + 1, false, {})
+    else
+      vim.api.nvim_buf_set_lines(0, row - 1, row, false, {})
+    end
     vim.fn.setreg(register, new_content)
   end
 

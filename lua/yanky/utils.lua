@@ -66,8 +66,10 @@ utils.update_indent = function(lines, new_indent)
 end
 
 function utils.use_temporary_register(register, register_info, callback)
-  local s = vim.split(register_info.regcontents:gsub("\n$", ""), "\n")
-  register_info.regcontents = utils.update_indent(s, vim.api.nvim_get_current_line():match("^(%s*)"))
+  if register_info.regtype == "V" then
+    local s = vim.split(register_info.regcontents:gsub("\n$", ""), "\n")
+    register_info.regcontents = utils.update_indent(s, vim.api.nvim_get_current_line():match("^(%s*)"))
+  end
   local current_register_info = utils.get_register_info(register)
   vim.fn.setreg(register, register_info.regcontents, register_info.regtype)
   callback()
